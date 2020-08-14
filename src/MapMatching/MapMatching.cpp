@@ -135,6 +135,8 @@ public:
 	int destination_node_id;
 	int origin_node_seq_no;
 	int destination_node_seq_no;
+	int origin_zone_id;
+	int destination_zone_id;
 
 	int start_time_in_second;
 	int end_time_in_second;
@@ -281,7 +283,7 @@ void g_ReadInputData()
 
 
 	CCSVParser parser_agent;
-	if (parser_agent.OpenCSVFile("input_agent.csv", true))
+	if (parser_agent.OpenCSVFile("agent.csv", true))
 	{
 		int origin_node_id, destination_node_id;
 
@@ -291,17 +293,17 @@ void g_ReadInputData()
 			if (parser_agent.GetValueByFieldName("agent_id", agent.agent_id) == false)
 				continue;
 
-			parser_agent.GetValueByFieldName("from_origin_node_id", origin_node_id, false);
-			parser_agent.GetValueByFieldName("to_destination_node_id", destination_node_id, false);
+			parser_agent.GetValueByFieldName("o_node_id", origin_node_id, false);
+			parser_agent.GetValueByFieldName("d_node_id", destination_node_id, false);
 
 			if (g_internal_node_seq_no_map.find(origin_node_id) == g_internal_node_seq_no_map.end())
 			{
-				cout << "warning: from_origin_node_id " << origin_node_id << " of agent " << agent.agent_id << " has not been defined in node.csv\n";
+				cout << "warning: o_node_id " << origin_node_id << " of agent " << agent.agent_id << " has not been defined in node.csv\n";
 				continue;
 			}
 			if (g_internal_node_seq_no_map.find(destination_node_id) == g_internal_node_seq_no_map.end())
 			{
-				cout << "warning: destination_node_id " << destination_node_id << " of agent " << agent.agent_id << " has not been defined in node.csv\n";
+				cout << "warning: d_node_id " << destination_node_id << " of agent " << agent.agent_id << " has not been defined in node.csv\n";
 				continue;
 			}
 
@@ -309,6 +311,8 @@ void g_ReadInputData()
 			agent.destination_node_id = destination_node_id;
 			agent.origin_node_seq_no = g_internal_node_seq_no_map[origin_node_id];
 			agent.destination_node_seq_no = g_internal_node_seq_no_map[destination_node_id];
+			parser_agent.GetValueByFieldName("o_zone_id", agent.origin_zone_id, false);
+			parser_agent.GetValueByFieldName("d_zone_id", agent.destination_zone_id, false);
 
 			g_agent_vector.push_back(agent);
 			g_internal_agent_no_map[agent.agent_id] = g_number_of_agents;
@@ -671,16 +675,18 @@ void g_OutAgentCSVFile_FromSimulation()
 	}
 	else
 	{
-		fprintf(g_pFileAgent, "agent_id, from_origin_node_id, to_destination_node_id, path_node_id_sequence,path_timestamp_sequence\n");
+		fprintf(g_pFileAgent, "agent_id,o_node_id,d_node_id,o_zone_id,d_zone_id,path_node_id_sequence,path_timestamp_sequence\n");
 
 		for (int a = 0; a < g_agent_vector.size(); a++)
 		{
 			CAgent* p_agent = &(g_agent_vector[a]);
 
-			fprintf(g_pFileAgent, "%d,%d,%d,",
+			fprintf(g_pFileAgent, "%d,%d,%d,%d,%d,",
 				p_agent->agent_id,
 				p_agent->origin_node_id,
-				p_agent->destination_node_id
+				p_agent->destination_node_id,
+				p_agent->origin_zone_id,
+				p_agent->destination_zone_id
 			);
 
 			for (int i = 0; i < p_agent->path_node_id_vector.size(); i++)
