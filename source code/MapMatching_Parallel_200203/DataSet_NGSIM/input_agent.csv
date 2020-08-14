@@ -1,5 +1,0 @@
-agent_id,from_origin_node_id,to_destination_node_id,departure_time_interval_no,PCE
-0,133,96,2,1
-3,650,610,60,1
-6,390,481,0,1
-9,650,611,66,1
